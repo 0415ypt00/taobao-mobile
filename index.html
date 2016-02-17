@@ -1,0 +1,238 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<title>Shadow Scroll</title>
+	<style type="text/css">
+	    body,div,ul,li,a{ margin: 0px; padding: 0px;}
+	    #banner{ width:1280px;height: 450px;margin: 0 auto;margin-top: 60px;position: relative;overflow: hidden;}
+		#banner ul li{ list-style:none;}
+	    #banner ul.bigpic{display: block; height: 450px; background: #000; margin-left: 0px;}
+	    #banner ul.bigpic li{ float: left; width: 1280px; height: 450px; list-style: none;}
+		#banner ul.smallpic{ display:block; width:645px; height:316px;}
+		#banner ul.smallpic li{ display:none; position:absolute; left:200px; bottom:-316px;}
+	    #banner a{display: block; width: 60px; height: 450px;  position:absolute; top: 0px;cursor:pointer; background:#FFF; opacity:0.5; filter:alpha(opacity:50);}
+		#banner a span{display:block; width:25px; height:50px; margin:0 auto; margin-top:200px;}
+	    #banner a.prev{left: -60px;}
+		#banner a.prev span{background:url(img/jiantou.png) no-repeat center -200px;}
+		#banner a:hover.prev span{background:url(img/jiantou.png) no-repeat center -300px;}
+	    #banner a.next{right: -60px;}
+		#banner a.next span{background:url(img/jiantou.png) no-repeat center 0px;}
+		#banner a:hover.next span{background:url(img/jiantou.png) no-repeat center -100px;} 	   
+	</style>
+	<script src="move.js"></script>
+	<script type="text/javascript">
+	/*
+	------------one mentod         --------------
+	window.onload = function(){
+		var oDiv = document.getElementById('banner');
+		var oUlBig = oDiv.getElementsByTagName('ul')[0];
+		var oUlSmall = oDiv.getElementsByTagName('ul')[1];
+		var oLiBig = oUlBig.getElementsByTagName('li');
+		var oLiSmall = oUlSmall.getElementsByTagName('li');
+		var oPrev = oDiv.getElementsByTagName('a')[0];
+		var oNext = oDiv.getElementsByTagName('a')[1];
+		oUlBig.innerHTML+=oUlBig.innerHTML;
+		oUlBig.style.width = oLiBig[0].offsetWidth*oLiBig.length+'px';
+		var now = 0;
+		oLiSmall[now].style.display = 'block';
+		startMove(oLiSmall[now],{bottom:-7});
+
+		oPrev.onclick = function(){
+			for(var i = 0;i<oLiSmall.length;i++){
+				oLiSmall[i].style.display = 'none';	
+				oLiSmall[i].style.bottom = "-316px";											
+			};
+			if(now==0){
+				oUlBig.style.marginLeft = -oLiBig[0].offsetWidth*oLiBig.length/2+'px';
+				now = oLiBig.length/2;
+				now--;
+				startMove(oUlBig,{marginLeft:-oLiBig[0].offsetWidth*now},function(){
+					oLiSmall[now].style.display = 'block';
+					startMove(oLiSmall[now],{bottom:-7});
+				});		
+			}else{
+				now--
+				startMove(oUlBig,{marginLeft:-oLiBig[0].offsetWidth*now},function(){
+					oLiSmall[now].style.display = 'block';
+					startMove(oLiSmall[now],{bottom:-7});
+				});					
+			};			
+		};
+		oNext.onclick = function(){	
+		    for(var i = 0;i<oLiSmall.length;i++){
+				oLiSmall[i].style.display = 'none';	
+				oLiSmall[i].style.bottom = "-316px";										
+			};
+			if(now==oLiBig.length/2-1){//3
+				now++;
+				startMove(oUlBig,{marginLeft:-oLiBig[0].offsetWidth*(now)},function(){
+					oLiSmall[0].style.display = 'block';
+					startMove(oLiSmall[0],{bottom:-7});
+				});								
+			}
+			else if(now==oLiBig.length/2){//4
+			    now=0;
+				now++;
+				oUlBig.style.marginLeft = '0px';
+				startMove(oUlBig,{marginLeft:-oLiBig[0].offsetWidth*(now)},function(){
+					oLiSmall[now].style.display = 'block';
+					startMove(oLiSmall[now],{bottom:-7});
+				});	
+			}
+			else{
+				now++;
+				startMove(oUlBig,{marginLeft:-oLiBig[0].offsetWidth*now},function(){
+					oLiSmall[now].style.display = 'block';
+					startMove(oLiSmall[now],{bottom:-7});
+				});
+			}						
+		};
+		
+		var autoplay = setInterval(oNext.onclick,3000);
+		oDiv.onmouseover = function(){
+			clearInterval(autoplay);
+			startMove(oPrev,{left:0});
+			startMove(oNext,{right:0});		
+		};
+		oDiv.onmouseout = function(){
+			autoplay = setInterval(oNext.onclick,3000);	
+			startMove(oPrev,{left:-60});
+			startMove(oNext,{right:-60});		
+		};
+	};
+
+	*/
+
+	//------------------------------- oop method    -----------------------
+	//define constructor Banobj
+	//right and left onclick
+	//Autoplay controlAutoplay
+	
+	function Banobj(){
+		this.now = 0;	
+	}
+
+	Banobj.prototype = {
+		//Core
+		play : function(){
+			var _this = this;
+            //get getElement Be executed
+			this.oDiv = document.getElementById('banner');
+			this.oUlSmall = this.oDiv.getElementsByTagName('ul')[1];
+			this.oUlBig = this.oDiv.getElementsByTagName('ul')[0];
+			this.oLiSmall = this.oUlSmall.getElementsByTagName('li');
+			this.oLiBig = this.oUlBig.getElementsByTagName('li');
+			this.oPrev = this.oDiv.getElementsByTagName('a')[0];
+			this.oNext = this.oDiv.getElementsByTagName('a')[1];
+	
+			this.oUlBig.innerHTML += this.oUlBig.innerHTML;
+		    this.oUlBig.style.width = this.oLiBig[0].offsetWidth*this.oLiBig.length+'px';
+		    this.oLiSmall[_this.now].style.display = 'block';
+		    startMove(_this.oLiSmall[_this.now],{bottom:-7});
+		    //startMove
+		    this.toclick();
+		    this.autoplay();
+		    this.controlAutoplay();
+		},
+        //right and left click event
+		toclick : function(){
+			var _this = this;
+
+			this.oPrev.onclick = function(){
+				for(var i = 0;i<_this.oLiSmall.length;i++){
+					_this.oLiSmall[i].style.display = 'none';	
+					_this.oLiSmall[i].style.bottom = "-316px";				
+				};
+				if(_this.now==0){
+					_this.oUlBig.style.marginLeft = -_this.oLiBig[0].offsetWidth*_this.oLiBig.length/2+'px';
+					_this.now = _this.oLiBig.length/2;
+					_this.now--;
+					startMove(_this.oUlBig,{marginLeft:-_this.oLiBig[0].offsetWidth*_this.now},function(){
+						_this.oLiSmall[_this.now].style.display = 'block';
+						startMove(_this.oLiSmall[_this.now],{bottom:-7});
+					});		
+				}else{
+					_this.now--
+					startMove(_this.oUlBig,{marginLeft:-_this.oLiBig[0].offsetWidth*_this.now},function(){
+						_this.oLiSmall[_this.now].style.display = 'block';
+						startMove(_this.oLiSmall[_this.now],{bottom:-7});
+					});					
+				};			
+			};
+
+			this.oNext.onclick = function(){	
+			    for(var i = 0;i<_this.oLiSmall.length;i++){
+					_this.oLiSmall[i].style.display = 'none';	
+					_this.oLiSmall[i].style.bottom = "-316px";										
+				};
+				if(_this.now==_this.oLiBig.length/2-1){//3
+					_this.now++;
+					startMove(_this.oUlBig,{marginLeft:-_this.oLiBig[0].offsetWidth*(_this.now)},function(){
+						_this.oLiSmall[0].style.display = 'block';
+						startMove(_this.oLiSmall[0],{bottom:-7});
+					});								
+				}
+				else if(_this.now==_this.oLiBig.length/2){//4
+				    _this.now=0;
+					_this.now++;
+					_this.oUlBig.style.marginLeft = '0px';
+					startMove(_this.oUlBig,{marginLeft:-_this.oLiBig[0].offsetWidth*(_this.now)},function(){
+						_this.oLiSmall[_this.now].style.display = 'block';
+						startMove(_this.oLiSmall[_this.now],{bottom:-7});
+					});	
+				}
+				else{
+					_this.now++;
+					startMove(_this.oUlBig,{marginLeft:-_this.oLiBig[0].offsetWidth*_this.now},function(){
+						_this.oLiSmall[_this.now].style.display = 'block';
+						startMove(_this.oLiSmall[_this.now],{bottom:-7});
+					});
+				}						
+			};
+		},
+        //autoplay
+		autoplay : function(){
+			this.varautoplay = setInterval(this.oNext.onclick,3000);
+		},
+        //control autoplay
+		controlAutoplay : function(){
+			var _this = this;
+			this.oDiv.onmouseover = function(){
+				clearInterval(_this.varautoplay);
+				startMove(_this.oPrev,{left:0});
+				startMove(_this.oNext,{right:0});		
+			};
+			this.oDiv.onmouseout = function(){
+				_this.varautoplay = setInterval(_this.oNext.onclick,3000);	
+				startMove(_this.oPrev,{left:-60});
+				startMove(_this.oNext,{right:-60});		
+			};
+		}
+	}
+
+	var homebaner = new Banobj();//new
+	window.onload = function(){
+		homebaner.play();
+	}
+	</script>
+</head>
+<body>
+	<div id="banner">
+	    <ul class="bigpic">
+		    <li><img src="img/1.jpg" alt=""></li>
+		    <li><img src="img/2.jpg" alt=""></li>
+		    <li><img src="img/3.jpg" alt=""></li>
+		    <li><img src="img/4.jpg" alt=""></li>
+	    </ul>
+        <ul class="smallpic">
+            <li><img src="img/1_1.png" alt=""></li>
+		    <li><img src="img/2_2.png" alt=""></li>
+		    <li><img src="img/3_3.png" alt=""></li>
+		    <li><img src="img/4_4.png" alt=""></li>
+        </ul>
+	    <a class="prev" href="javascript:;"><span></span></a>
+		<a class="next" href="javascript:;"><span></span></a>
+	</div>
+</body>
+</html>
